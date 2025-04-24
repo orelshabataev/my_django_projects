@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="post-detail">
+    <div class="section-card">
+        {% if post.photo %}
+        <img src="{{ post.photo.url }}" alt="{{ post.title }}" class="post-image">
+        {% endif %}
+        <h1 class="post-title">{{ post.title }}</h1>
+        <p class="post-meta">
+            Опубликовано: {{ post.created_at|date:"d.m.Y" }}<br>
+            Обновлено: {{ post.updated_at|date:"d.m.Y" }}
+            Автор: {{ post.auther.username }}
+        </p>
+        <div class="post-content">
+            {{ post.content|linebreaks|safe }}
+        </div>
+        <h3>Коментарии ({{ comments.count }})</h3>
+        {% for comment in comments %}
+        <div class="comment">
+            <strong>{{ comment.author.username }}</strong><small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+            {% if request.user == comment.author %}
+            <p style="color:blue;font-weight:800;">{{ comment.text }}</p>
+            {% else %}
+            <p>{{ comment.text }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% if request.user.is_authenticated %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Отправить</button>
+        </form>
+        {% else %}
+        <p>Чтобы оставить комментарий <a href="{% url 'login' %}">Войдите</a></p>
+        {% endif %}
+        <p>Просмотров: {{ post.views }} </p>
+        <a href="{% url 'home' %}" class="btn-primary">Назад к статьям</a>
+        {% if request.user == post.auther %}
+        <a href="{% url 'edit_page' post.pk %}" class="btn-primary">Редактировать статью</a>
+        <a href="{% url 'delete' post.pk %}" class="btn-primary">Удалить</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
